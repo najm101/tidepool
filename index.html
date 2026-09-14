@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/tidepool/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="A new Flutter project.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="natgas">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>natgas</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    // Desktop browsers get the app inside an iPhone frame; phones and tablets
+    // get it full screen. lib/web/phone_frame.dart reads this object.
+    window.phoneFrame = (() => {
+      const root = document.documentElement;
+      const platform = navigator.platform || "";
+      const mobile = platform.startsWith("Mac")
+        ? navigator.maxTouchPoints > 2 // iPadOS reports itself as a Mac.
+        : /iPhone|iPad|iPod/.test(platform) || /Android/.test(navigator.userAgent);
+      root.classList.toggle("framed", !mobile);
+      return {
+        framed: !mobile,
+        setDarkTheme(dark) {
+          root.classList.toggle("app-dark", dark);
+          root.classList.toggle("app-light", !dark);
+        },
+      };
+    })();
+
+    // flutter_native_splash calls this once the demo user is signed in.
+    window.removeSplashFromWeb = () => {
+      document.getElementById("loader").classList.add("hidden");
+    };
+  </script>
+
+  <style>
+    /* Light by default, like the app; its theme takes over once it starts. */
+    :root {
+      color-scheme: light;
+      --page: #e6e8ec;
+      --page-glow: #f7f8fa;
+      --shadow: rgba(16, 18, 24, 0.32);
+      /* The app's own background, and the status bar drawn over it. */
+      --screen: #ffffff;
+      --chrome: #000000;
+      --brand: #1591c7;
+      /* An iPhone 16 screen is 393 x 852; shrink it to fit short windows. */
+      --screen-height: clamp(600px, calc(100dvh - 80px), 852px);
+    }
+
+    :root.app-light { --screen: #ffffff; --chrome: #000000; }
+    :root.app-dark { --screen: #020817; --chrome: #ffffff; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: var(--screen);
+    }
+
+    /* Phones: the screen is the whole viewport and the frame is hidden. */
+    .screen {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+      isolation: isolate;
+      background: var(--screen);
+    }
+
+    #app {
+      position: absolute;
+      inset: 0;
+    }
+
+    .button,
+    .status-bar,
+    .home-indicator {
+      display: none;
+    }
+
+    .loader {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+      background: var(--screen);
+      transition: opacity 0.4s ease, visibility 0.4s;
+    }
+
+    .loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader img {
+      width: min(200px, 52%);
+      height: auto;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      box-sizing: border-box;
+      border-radius: 50%;
+      border: 2.5px solid color-mix(in srgb, var(--brand) 20%, transparent);
+      border-top-color: var(--brand);
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Desktop: an iPhone 16 around the screen. */
+    .framed body {
+      overflow: auto;
+      background: radial-gradient(circle at 50% 35%, var(--page-glow), var(--page) 70%);
+    }
+
+    .framed .stage {
+      box-sizing: border-box;
+      min-height: 100dvh;
+      padding: 40px 24px;
+      display: grid;
+      place-items: center;
+    }
+
+    .framed .phone {
+      position: relative;
+      padding: 11px;
+      border-radius: 68px;
+      background: #040405;
+      box-shadow:
+        0 0 0 1.5px #1c1d20,
+        0 0 0 4px #6b6d73,
+        0 0 0 5px #3a3b40,
+        0 60px 110px -30px var(--shadow);
+    }
+
+    .framed .screen {
+      width: calc(var(--screen-height) * 393 / 852);
+      height: var(--screen-height);
+      border-radius: 57px;
+    }
+
+    .framed .button {
+      display: block;
+      position: absolute;
+      width: 4px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #4b4d52, #8a8c92, #4b4d52);
+    }
+
+    .framed .button.action { left: -9px; top: 13%; height: 3.8%; }
+    .framed .button.volume-up { left: -9px; top: 21%; height: 7.2%; }
+    .framed .button.volume-down { left: -9px; top: 30%; height: 7.2%; }
+    .framed .button.side { right: -9px; top: 24%; height: 11.5%; }
+
+    .framed .status-bar {
+      display: block;
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 54px;
+      z-index: 2;
+      pointer-events: none;
+      direction: ltr;
+      color: var(--chrome);
+      font: 600 17px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, sans-serif;
+      letter-spacing: -0.2px;
+      transition: color 0.2s ease;
+    }
+
+    .clock,
+    .indicators {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: calc(50% - 62.5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 4px;
+      box-sizing: border-box;
+    }
+
+    .clock {
+      left: 0;
+      padding-left: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .indicators {
+      right: 0;
+      gap: 6px;
+      padding-right: 12px;
+    }
+
+    .indicators svg {
+      display: block;
+      fill: currentColor;
+    }
+
+    .island {
+      position: absolute;
+      top: 11px;
+      left: 50%;
+      width: 125px;
+      height: 37px;
+      transform: translateX(-50%);
+      border-radius: 19px;
+      background: #000000;
+    }
+
+    .framed .home-indicator {
+      display: block;
+      position: absolute;
+      left: 50%;
+      bottom: 8px;
+      width: 139px;
+      height: 5px;
+      transform: translateX(-50%);
+      border-radius: 3px;
+      z-index: 2;
+      pointer-events: none;
+      background: var(--chrome);
+      transition: background 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="phone">
+      <span class="button action"></span>
+      <span class="button volume-up"></span>
+      <span class="button volume-down"></span>
+      <span class="button side"></span>
+
+      <div class="screen">
+        <div id="app"></div>
+
+        <div id="loader" class="loader">
+          <img src="assets/assets/app-icon-tr.png" alt="">
+          <span class="spinner"></span>
+        </div>
+
+        <div class="status-bar" aria-hidden="true">
+          <span class="clock" id="clock">9:41</span>
+          <span class="island"></span>
+          <span class="indicators">
+            <svg width="18" height="12" viewBox="0 0 18 12">
+              <rect x="0" y="8" width="3" height="4" rx="1"/>
+              <rect x="5" y="5.5" width="3" height="6.5" rx="1"/>
+              <rect x="10" y="3" width="3" height="9" rx="1"/>
+              <rect x="15" y="0" width="3" height="12" rx="1"/>
+            </svg>
+            <svg width="17" height="12" viewBox="-0.6 0 17.2 12" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round">
+              <path d="M8 11.5 5.454 8.954A3.6 3.6 0 0 1 10.546 8.954Z"/>
+              <path d="M2.626 6.126A7.6 7.6 0 0 1 13.374 6.126L11.606 7.894A5.1 5.1 0 0 0 4.394 7.894Z"/>
+              <path d="M-.132 3.368A11.5 11.5 0 0 1 16.132 3.368L14.435 5.065A9.1 9.1 0 0 0 1.565 5.065Z"/>
+            </svg>
+            <svg width="27" height="13" viewBox="0 0 27 13">
+              <rect x="0.5" y="0.5" width="23" height="12" rx="3.8" fill="none" stroke="currentColor" stroke-opacity="0.35"/>
+              <rect x="2" y="2" width="20" height="9" rx="2.4"/>
+              <path d="M25 4.4v4.2c.85-.3 1.5-1.15 1.5-2.1s-.65-1.8-1.5-2.1Z" fill-opacity="0.4"/>
+            </svg>
+          </span>
+        </div>
+
+        <span class="home-indicator"></span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // The status bar shows the visitor's own time, iOS style.
+    (() => {
+      const clock = document.getElementById("clock");
+      const tick = () => {
+        const now = new Date();
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        clock.textContent = `${now.getHours() % 12 || 12}:${minutes}`;
+        setTimeout(tick, (60 - now.getSeconds()) * 1000);
+      };
+      tick();
+    })();
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
